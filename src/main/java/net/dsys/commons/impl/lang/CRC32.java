@@ -17,6 +17,7 @@
 package net.dsys.commons.impl.lang;
 
 import java.nio.ByteBuffer;
+import java.util.zip.Checksum;
 
 /**
  * Calculation of CRC32 based on a cached table. This implementation outperforms
@@ -28,10 +29,15 @@ import java.nio.ByteBuffer;
  * 
  * @author Ricardo Padilha
  */
-public final class CRC32 {
+public final class CRC32 implements Checksum {
 
-	private static final int MASK = 0xffffffff;
-	private static final int[] table = { 0x00000000, 0x77073096, 0xee0e612c,
+	private static final int BYTE_SIZE = Byte.SIZE;
+	private static final int BYTE_MASK = 0xFF;
+	private static final int INT_MASK = 0xFFFF_FFFF;
+	private static final int INT_COUNT = (Integer.SIZE / Byte.SIZE) - 1;
+	private static final int LONG_COUNT = (Long.SIZE / Byte.SIZE) - 1;
+
+	private static final int[] TABLE = { 0x00000000, 0x77073096, 0xee0e612c,
 			0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
 			0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b,
 			0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2,
@@ -84,131 +90,197 @@ public final class CRC32 {
 			0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37,
 			0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d, };
 
-	public static int calculate(final byte... values) {
-		int crc = MASK;
+	public static int digest(final byte... values) {
+		int crc = INT_MASK;
 		for (int j = 0, k = values.length; j < k; j++) {
-			crc = (crc >>> 8) ^ table[(crc ^ values[j]) & 0xff];
+			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ values[j]) & BYTE_MASK];
 		}
-		crc = crc ^ MASK;
+		crc = crc ^ INT_MASK;
 		return crc;
 	}
 
 	/**
 	 * Calculates the CRC32 of an integer as if it was an 4-byte array (big-endian).
 	 */
-	public static int calculate(final int value) {
-		int crc = MASK;
-		for (int i = 3; i >= 0; i--) {
-			final byte b = (byte) (value >>> (i * 8));
-			crc = (crc >>> 8) ^ table[(crc ^ b) & 0xff];
+	public static int digest(final int value) {
+		int crc = INT_MASK;
+		for (int i = INT_COUNT; i >= 0; i--) {
+			final byte b = (byte) (value >>> (i * BYTE_SIZE));
+			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ b) & BYTE_MASK];
 		}
-		crc = crc ^ MASK;
+		crc = crc ^ INT_MASK;
 		return crc;
 	}
 
 	/**
 	 * Calculates the CRC32 of integers as if they were 4-byte arrays (big-endian).
 	 */
-	public static int calculate(final int... values) {
-		int crc = MASK;
+	public static int digest(final int... values) {
+		int crc = INT_MASK;
 		for (int j = 0, k = values.length; j < k; j++) {
 			final int value = values[j];
-			for (int i = 3; i >= 0; i--) {
-				final byte b = (byte) (value >>> (i * 8));
-				crc = (crc >>> 8) ^ table[(crc ^ b) & 0xff];
+			for (int i = INT_COUNT; i >= 0; i--) {
+				final byte b = (byte) (value >>> (i * BYTE_SIZE));
+				crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ b) & BYTE_MASK];
 			}
 		}
-		crc = crc ^ MASK;
+		crc = crc ^ INT_MASK;
 		return crc;
 	}
 
 	/**
 	 * Calculates the CRC32 of a long as if it was an 8-byte array (big-endian).
 	 */
-	public static int calculate(final long value) {
-		int crc = MASK;
-		for (int i = 7; i >= 0; i++) {
-			final byte b = (byte) (value >>> (i * 8));
-			crc = (crc >>> 8) ^ table[(crc ^ b) & 0xff];
+	public static int digest(final long value) {
+		int crc = INT_MASK;
+		for (int i = LONG_COUNT; i >= 0; i++) {
+			final byte b = (byte) (value >>> (i * BYTE_SIZE));
+			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ b) & BYTE_MASK];
 		}
-		crc = crc ^ MASK;
+		crc = crc ^ INT_MASK;
 		return crc;
 	}
 
 	/**
 	 * Calculates the CRC32 of longs as if they were 8-byte arrays (big-endian).
 	 */
-	public static int calculate(final long... values) {
-		int crc = MASK;
+	public static int digest(final long... values) {
+		int crc = INT_MASK;
 		for (int j = 0, k = values.length; j < k; j++) {
 			final long value = values[j];
-			for (int i = 7; i >= 0; i++) {
-				final byte b = (byte) (value >>> (i * 8));
-				crc = (crc >>> 8) ^ table[(crc ^ b) & 0xff];
+			for (int i = LONG_COUNT; i >= 0; i++) {
+				final byte b = (byte) (value >>> (i * BYTE_SIZE));
+				crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ b) & BYTE_MASK];
 			}
 		}
-		crc = crc ^ MASK;
+		crc = crc ^ INT_MASK;
 		return crc;
 	}
 
 	/**
-	 * Calculates the CRC32 of a byte[].
+	 * Calculates the CRC32 of a byte array.
 	 */
-	public static int calculate(final byte[] array, final int offset, final int length) {
-		int crc = MASK;
+	public static int digest(final byte[] array, final int offset, final int length) {
+		int crc = INT_MASK;
 		for (int i = offset, k = offset + length; i < k; i++) {
-			crc = (crc >>> 8) ^ table[(crc ^ array[i]) & 0xff];
+			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ array[i]) & BYTE_MASK];
 		}
-		crc = crc ^ MASK;
+		crc = crc ^ INT_MASK;
 		return crc;
 	}
 
 	/**
-	 * Calculates the CRC32 of ByteBuffers as if they were byte arrays.
+	 * Calculates the CRC32 of the bytes from the specified buffer. The
+	 * checksum is updated using buffer.remaining() bytes starting at
+	 * buffer.position() Upon return, the buffer's position will be updated to
+	 * its limit; its limit will not have been changed.
 	 */
-	public static int calculate(final ByteBuffer value) {
-		int crc = MASK;
+	public static int digest(final ByteBuffer value) {
+		int crc = INT_MASK;
 		for (int i = value.position(), k = value.limit(); i < k; i++) {
-			crc = (crc >>> 8) ^ table[(crc ^ value.get(i)) & 0xff];
+			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ value.get(i)) & BYTE_MASK];
 		}
-		crc = crc ^ MASK;
+		crc = crc ^ INT_MASK;
+		value.position(value.limit());
+		return crc;
+	}
+
+	/**
+	 * Calculates the CRC32 of the bytes from the specified buffer. The
+	 * checksum is updated byte retrieving bytes directly from the buffer.
+	 * The buffer's position and limit are not affected.
+	 */
+	public static int digest(final ByteBuffer value, final int position, final int limit) {
+		int crc = INT_MASK;
+		for (int i = position, k = limit; i < k; i++) {
+			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ value.get(i)) & BYTE_MASK];
+		}
+		crc = crc ^ INT_MASK;
 		return crc;
 	}
 
 	private int crc;
 
 	public CRC32() {
-		return;
-	}
-
-	public void reset() {
-		crc = MASK;
+		reset();
 	}
 
 	/**
-	 * Calculates the CRC32 of an integer as if it was an 4-byte array (big-endian).
+	 * Resets CRC-32 to initial value.
 	 */
-	public void update(final int value) {
-		for (int i = 3; i >= 0; i--) {
-			final byte b = (byte) (value >>> (i * 8));
-			crc = (crc >>> 8) ^ table[(crc ^ b) & 0xff];
-		}
+	@Override
+	public void reset() {
+		crc = INT_MASK;
 	}
 
+	/**
+	 * Calculates the CRC32 of a byte.
+	 */
+	@Override
+	public void update(final int value) {
+		crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ (value & BYTE_MASK)) & BYTE_MASK];
+	}
+
+	/**
+	 * Updates the CRC-32 checksum with the specified array of bytes.
+	 * @param array the array of bytes to update the checksum with
+	 */
 	public void update(final byte[] array) {
 		update(array, 0, array.length);
 	}
 
+	/**
+	 * @param array
+	 * @param offset
+	 * @param length
+	 */
+	@Override
 	public void update(final byte[] array, final int offset, final int length) {
 		for (int i = offset, k = offset + length; i < k; i++) {
-			crc = (crc >>> 8) ^ table[(crc ^ array[i]) & 0xff];
+			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ array[i]) & BYTE_MASK];
+		}
+	}
+
+	/**
+	 * Updates the checksum with the bytes from the specified buffer. The
+	 * checksum is updated using buffer.remaining() bytes starting at
+	 * buffer.position() Upon return, the buffer's position will be updated to
+	 * its limit; its limit will not have been changed.
+	 * 
+	 * @param buffer the ByteBuffer to update the checksum with
+	 */
+	public void update(final ByteBuffer buffer) {
+		for (int i = buffer.position(), k = buffer.limit(); i < k; i++) {
+			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ buffer.get(i)) & BYTE_MASK];
+		}
+		buffer.position(buffer.limit());
+	}
+
+	/**
+	 * Updates the checksum with the bytes from the specified buffer. The
+	 * checksum is updated byte retrieving bytes directly from the buffer.
+	 * The buffer's position and limit are not affected.
+	 * 
+	 * @param buffer the ByteBuffer to update the checksum with
+	 */
+	public void update(final ByteBuffer value, final int position, final int limit) {
+		for (int i = position; i < limit; i++) {
+			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ value.get(i)) & BYTE_MASK];
 		}
 	}
 
 	public int digest() {
-		final int digest = this.crc ^ MASK;
-		this.crc = MASK;
+		final int digest = this.crc ^ INT_MASK;
+		this.crc = INT_MASK;
 		return digest;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public long getValue() {
+		return digest();
 	}
 
 }
