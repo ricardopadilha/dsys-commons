@@ -16,24 +16,30 @@
 
 package net.dsys.commons.impl.future;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import net.dsys.commons.api.future.CallbackFuture;
 
 /**
  * @author Ricardo Padilha
  */
-public final class SettableFuture<V> implements Future<V> {
+public final class SettableCallbackFuture<V> implements CallbackFuture<V> {
 
 	private final Object sync;
 	private boolean done;
 	private boolean cancelled;
 	private V value;
-	private Throwable exception;
+	private Throwable throwable;
+	private Queue<Task> tasks;
+	private boolean notified;
 
-	public SettableFuture() {
+	public SettableCallbackFuture() {
 		super();
 		this.sync = new Object();
 	}
@@ -49,7 +55,7 @@ public final class SettableFuture<V> implements Future<V> {
 			}
 			this.value = value;
 			this.done = true;
-			sync.notifyAll();
+			notifyCompletion();
 		}
 	}
 
@@ -57,14 +63,14 @@ public final class SettableFuture<V> implements Future<V> {
 	 * Define the outcome of this future, notify threads waiting on
 	 * {@link #get()}.
 	 */
-	public void fail(final Throwable exception) {
+	public void fail(final Throwable throwable) {
 		synchronized (sync) {
 			if (done) {
 				return;
 			}
-			this.exception = exception;
+			this.throwable = throwable;
 			this.done = true;
-			sync.notifyAll();
+			notifyCompletion();
 		}
 	}
 
@@ -79,9 +85,25 @@ public final class SettableFuture<V> implements Future<V> {
 			}
 			this.cancelled = true;
 			this.done = true;
-			sync.notifyAll();
+			notifyCompletion();
 			return true;
 		}
+	}
+
+	/**
+	 * Only call from synchronized block
+	 */
+	private void notifyCompletion() {
+		if (notified) {
+			return;
+		}
+		if (tasks != null) {
+			while (!tasks.isEmpty()) {
+				tasks.poll().execute();
+			}
+		}
+		notified = true;
+		sync.notifyAll();
 	}
 
 	/**
@@ -114,8 +136,8 @@ public final class SettableFuture<V> implements Future<V> {
 				if (cancelled) {
 					throw new CancellationException();
 				}
-				if (exception != null) {
-					throw new ExecutionException(exception);
+				if (throwable != null) {
+					throw new ExecutionException(throwable);
 				}
 				return value;
 			}
@@ -125,8 +147,8 @@ public final class SettableFuture<V> implements Future<V> {
 			if (cancelled) {
 				throw new CancellationException();
 			}
-			if (exception != null) {
-				throw new ExecutionException(exception);
+			if (throwable != null) {
+				throw new ExecutionException(throwable);
 			}
 			return value;
 		}
@@ -143,8 +165,8 @@ public final class SettableFuture<V> implements Future<V> {
 				if (cancelled) {
 					throw new CancellationException();
 				}
-				if (exception != null) {
-					throw new ExecutionException(exception);
+				if (throwable != null) {
+					throw new ExecutionException(throwable);
 				}
 				return value;
 			}
@@ -161,4 +183,43 @@ public final class SettableFuture<V> implements Future<V> {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void onCompletion(final Runnable runnable, final Executor executor) {
+		if (notified) {
+			executor.execute(runnable);
+			return;
+		}
+
+		synchronized (sync) {
+			// re-check for safety
+			if (notified) {
+				executor.execute(runnable);
+				return;
+			}
+			if (tasks == null) {
+				tasks = new ArrayDeque<>();
+			}
+			tasks.add(new Task(runnable, executor));
+		}
+	}
+
+	/**
+	 * @author Ricardo Padilha
+	 */
+	private static final class Task {
+		private final Runnable runnable;
+		private final Executor executor;
+
+		Task(final Runnable runnable, final Executor executor) {
+			this.runnable = runnable;
+			this.executor = executor;
+		}
+
+		void execute() {
+			executor.execute(runnable);
+		}
+	}
 }
