@@ -24,8 +24,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import net.dsys.commons.api.lang.Merger;
 import net.dsys.commons.impl.builder.Mandatory;
 import net.dsys.commons.impl.builder.Optional;
+import net.dsys.commons.impl.lang.FixedMerger;
 
 /**
  * @author Ricardo Padilha
@@ -133,7 +135,7 @@ public final class MergingFuture<V> implements Future<V> {
 
 		Builder() {
 			this.list = new ArrayList<>();
-			this.merger = createNullMerger();
+			this.merger = new FixedMerger<>(null);
 		}
 
 		/**
@@ -163,32 +165,4 @@ public final class MergingFuture<V> implements Future<V> {
 		}
 
 	}
-
-	/**
-	 * @author Ricardo Padilha
-	 * @param <E>
-	 *            type of the result to be merged
-	 */
-	public interface Merger<E> {
-		/**
-		 * @param values
-		 *            the results from the other futures
-		 * @return the merged result
-		 */
-		E merge(Collection<E> values);
-	}
-
-	/**
-	 * @return a Merger that does nothing, i.e., always returns
-	 *         <code>null</code>
-	 */
-	public static <T> Merger<T> createNullMerger() {
-		return new Merger<T>() {
-			@Override
-			public T merge(final Collection<T> values) {
-				return null;
-			}
-		};
-	}
-
 }
