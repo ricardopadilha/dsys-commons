@@ -34,7 +34,6 @@ public final class SettableFuture<V> implements Future<V> {
 	private Throwable exception;
 
 	public SettableFuture() {
-		super();
 		this.sync = new Object();
 	}
 

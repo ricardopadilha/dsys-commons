@@ -40,7 +40,6 @@ public final class SettableCallbackFuture<V> implements CallbackFuture<V> {
 	private boolean notified;
 
 	public SettableCallbackFuture() {
-		super();
 		this.sync = new Object();
 	}
 

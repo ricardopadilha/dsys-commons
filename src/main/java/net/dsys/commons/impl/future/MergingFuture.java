@@ -123,7 +123,7 @@ public final class MergingFuture<V> implements Future<V> {
 	}
 
 	/**
-	 * If no Merger is provided, {@link MergingFuture#createNullMerger()} is
+	 * If no Merger is provided, a {@link FixedMerger} returning <code>null</code> is
 	 * used.
 	 * 
 	 * @author Ricardo Padilha
