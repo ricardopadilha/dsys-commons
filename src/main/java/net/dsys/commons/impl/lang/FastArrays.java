@@ -290,14 +290,14 @@ public final class FastArrays {
 			return LONG_LENGTH;
 		}
 		// fall-back to plain Java
-		array[offset] =   (byte) (value >>> 56);
-		array[offset+1] = (byte) (value >>> 48);
-		array[offset+2] = (byte) (value >>> 40);
-		array[offset+3] = (byte) (value >>> 32);
-		array[offset+4] = (byte) (value >>> 24);
-		array[offset+5] = (byte) (value >>> 16);
-		array[offset+6] = (byte) (value >>>  8);
-		array[offset+7] = (byte) (value);
+		array[offset]     = (byte) (value >>> 56);
+		array[offset + 1] = (byte) (value >>> 48);
+		array[offset + 2] = (byte) (value >>> 40);
+		array[offset + 3] = (byte) (value >>> 32);
+		array[offset + 4] = (byte) (value >>> 24);
+		array[offset + 5] = (byte) (value >>> 16);
+		array[offset + 6] = (byte) (value >>>  8);
+		array[offset + 7] = (byte) (value);
 		return LONG_LENGTH;
 	}
 
