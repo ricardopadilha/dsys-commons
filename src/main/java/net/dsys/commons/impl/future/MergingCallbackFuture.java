@@ -276,6 +276,14 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 	}
 
 	/**
+	 * @return a {@link Builder} for {@link MergingCallbackFuture}, which uses a
+	 *         {@link Merger} created using {@link #createNullMerger()}
+	 */
+	public static <E> Builder<E> builder() {
+		return new Builder<>();
+	}
+
+	/**
 	 * @author Ricardo Padilha
 	 */
 	private static final class Task {
@@ -295,14 +303,6 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 				return;
 			}
 		}
-	}
-
-	/**
-	 * @return a {@link Builder} for {@link MergingCallbackFuture}, which uses a
-	 *         {@link Merger} created using {@link #createNullMerger()}
-	 */
-	public static <E> Builder<E> builder() {
-		return new Builder<>();
 	}
 
 	/**

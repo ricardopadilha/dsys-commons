@@ -86,12 +86,13 @@ public final class MJRTY implements Election {
 	 */
 	@Override
 	public int elect(final int threshold, final int nullValue, final int... votes) {
+		final int k = votes.length;
 		int nulls = 0;
 		int index = -1;
 		int winner = nullValue;
 		int count = 0;
 		// first pass: pairing
-		for (int i = 0, k = votes.length; i < k; i++) {
+		for (int i = 0; i < k; i++) {
 			final int value = votes[i];
 			if (value == nullValue) {
 				nulls++;
@@ -109,7 +110,7 @@ public final class MJRTY implements Election {
 		// second pass: counting
 		if (winner != nullValue && count < threshold) {
 			int recount = 0;
-			for (int i = 0, k = votes.length; i < k; i++) {
+			for (int i = 0; i < k; i++) {
 				if (winner == votes[i] && ++recount >= threshold) {
 					return index;
 				}
@@ -127,12 +128,13 @@ public final class MJRTY implements Election {
 	 */
 	@Override
 	public int elect(final int threshold, final long nullValue, final long... votes) {
+		final int k = votes.length;
 		int nulls = 0;
 		int index = -1;
 		long winner = nullValue;
 		int count = 0;
 		// first pass: pairing
-		for (int i = 0, k = votes.length; i < k; i++) {
+		for (int i = 0; i < k; i++) {
 			final long value = votes[i];
 			if (value == nullValue) {
 				nulls++;
@@ -150,7 +152,7 @@ public final class MJRTY implements Election {
 		// second pass: counting
 		if (winner != nullValue && count < threshold) {
 			int recount = 0;
-			for (int i = 0, k = votes.length; i < k; i++) {
+			for (int i = 0; i < k; i++) {
 				if (winner == votes[i] && ++recount >= threshold) {
 					return index;
 				}

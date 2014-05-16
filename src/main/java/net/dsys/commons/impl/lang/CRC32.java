@@ -90,9 +90,16 @@ public final class CRC32 implements Checksum {
 			0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37,
 			0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d, };
 
+	private int crc;
+
+	public CRC32() {
+		reset();
+	}
+
 	public static int digest(final byte... values) {
+		final int k = values.length;
 		int crc = INT_MASK;
-		for (int j = 0, k = values.length; j < k; j++) {
+		for (int j = 0; j < k; j++) {
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ values[j]) & BYTE_MASK];
 		}
 		crc = crc ^ INT_MASK;
@@ -116,8 +123,9 @@ public final class CRC32 implements Checksum {
 	 * Calculates the CRC32 of integers as if they were 4-byte arrays (big-endian).
 	 */
 	public static int digest(final int... values) {
+		final int k = values.length;
 		int crc = INT_MASK;
-		for (int j = 0, k = values.length; j < k; j++) {
+		for (int j = 0; j < k; j++) {
 			final int value = values[j];
 			for (int i = INT_COUNT; i >= 0; i--) {
 				final byte b = (byte) (value >>> (i * BYTE_SIZE));
@@ -145,8 +153,9 @@ public final class CRC32 implements Checksum {
 	 * Calculates the CRC32 of longs as if they were 8-byte arrays (big-endian).
 	 */
 	public static int digest(final long... values) {
+		final int k = values.length;
 		int crc = INT_MASK;
-		for (int j = 0, k = values.length; j < k; j++) {
+		for (int j = 0; j < k; j++) {
 			final long value = values[j];
 			for (int i = LONG_COUNT; i >= 0; i++) {
 				final byte b = (byte) (value >>> (i * BYTE_SIZE));
@@ -161,8 +170,9 @@ public final class CRC32 implements Checksum {
 	 * Calculates the CRC32 of a byte array.
 	 */
 	public static int digest(final byte[] array, final int offset, final int length) {
+		final int k = offset + length;
 		int crc = INT_MASK;
-		for (int i = offset, k = offset + length; i < k; i++) {
+		for (int i = offset; i < k; i++) {
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ array[i]) & BYTE_MASK];
 		}
 		crc = crc ^ INT_MASK;
@@ -176,8 +186,9 @@ public final class CRC32 implements Checksum {
 	 * its limit; its limit will not have been changed.
 	 */
 	public static int digest(final ByteBuffer value) {
+		final int k = value.limit();
 		int crc = INT_MASK;
-		for (int i = value.position(), k = value.limit(); i < k; i++) {
+		for (int i = value.position(); i < k; i++) {
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ value.get(i)) & BYTE_MASK];
 		}
 		crc = crc ^ INT_MASK;
@@ -192,17 +203,11 @@ public final class CRC32 implements Checksum {
 	 */
 	public static int digest(final ByteBuffer value, final int position, final int limit) {
 		int crc = INT_MASK;
-		for (int i = position, k = limit; i < k; i++) {
+		for (int i = position; i < limit; i++) {
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ value.get(i)) & BYTE_MASK];
 		}
 		crc = crc ^ INT_MASK;
 		return crc;
-	}
-
-	private int crc;
-
-	public CRC32() {
-		reset();
 	}
 
 	/**
@@ -236,7 +241,8 @@ public final class CRC32 implements Checksum {
 	 */
 	@Override
 	public void update(final byte[] array, final int offset, final int length) {
-		for (int i = offset, k = offset + length; i < k; i++) {
+		final int k = offset + length;
+		for (int i = offset; i < k; i++) {
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ array[i]) & BYTE_MASK];
 		}
 	}
@@ -250,7 +256,8 @@ public final class CRC32 implements Checksum {
 	 * @param buffer the ByteBuffer to update the checksum with
 	 */
 	public void update(final ByteBuffer buffer) {
-		for (int i = buffer.position(), k = buffer.limit(); i < k; i++) {
+		final int k = buffer.limit();
+		for (int i = buffer.position(); i < k; i++) {
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ buffer.get(i)) & BYTE_MASK];
 		}
 		buffer.position(buffer.limit());

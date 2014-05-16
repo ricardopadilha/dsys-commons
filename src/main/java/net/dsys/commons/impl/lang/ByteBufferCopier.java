@@ -26,6 +26,10 @@ import net.dsys.commons.api.lang.Copier;
  */
 public final class ByteBufferCopier implements Copier<ByteBuffer>, Cleaner<ByteBuffer> {
 
+	public ByteBufferCopier() {
+		super();
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */

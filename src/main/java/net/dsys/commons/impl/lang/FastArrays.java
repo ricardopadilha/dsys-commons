@@ -36,7 +36,39 @@ import sun.misc.Unsafe;
  * 
  * @author Ricardo Padilha
  */
+@SuppressWarnings("restriction")
 public final class FastArrays {
+
+	private static final Unsafe UNSAFE = getUnsafeOrNull();
+	private static final boolean FAST = UNSAFE != null;
+
+	private static final int BYTE_LENGTH = Byte.SIZE / Byte.SIZE;
+	private static final int BOOLEAN_LENGTH = BYTE_LENGTH;
+	private static final int SHORT_LENGTH = Short.SIZE / Byte.SIZE;
+	private static final int INT_LENGTH = Integer.SIZE / Byte.SIZE;
+	private static final int LONG_LENGTH = Long.SIZE / Byte.SIZE;
+
+	private static final int BYTE_MASK = 0xFF;
+	private static final int SHORT_MASK = 0xFFFF;
+	private static final long INT_MASK = 0xFFFF_FFFFL;
+	private static final byte BOOLEAN_TRUE = 1;
+	private static final byte BOOLEAN_FALSE = 0;
+
+	/**
+	 * This boolean indicates whether or not data read with the Unsafe needs to
+	 * be reversed byte-wise, because the VM is not big endian.
+	 */
+	private static final boolean REVERSE = ByteOrder.nativeOrder() != ByteOrder.BIG_ENDIAN;
+	private static final long BYTE_ARRAY_OFFSET = Unsafe.ARRAY_BYTE_BASE_OFFSET;
+	//private static final long SHORT_ARRAY_OFFSET = Unsafe.ARRAY_SHORT_BASE_OFFSET;
+	//private static final long INT_ARRAY_OFFSET = Unsafe.ARRAY_INT_BASE_OFFSET;
+	private static final long LONG_ARRAY_OFFSET = Unsafe.ARRAY_LONG_BASE_OFFSET;
+	private static final long BB_ADDRESS_OFFSET = fieldOffsetOrError(UNSAFE, Buffer.class, "address");
+
+	private FastArrays() {
+		// no instantiation allowed
+		return;
+	}
 
 	private static Unsafe getUnsafe() throws PrivilegedActionException {
 		return AccessController.doPrivileged(new PrivilegedExceptionAction<Unsafe>() {
@@ -68,37 +100,6 @@ public final class FastArrays {
 		} catch (final NoSuchFieldException | SecurityException e) {
 			throw new AssertionError(e.getLocalizedMessage());
 		}
-	}
-
-    private static final Unsafe UNSAFE = getUnsafeOrNull();
-	private static final boolean FAST = UNSAFE != null;
-
-	private static final int BYTE_LENGTH = Byte.SIZE / Byte.SIZE;
-	private static final int BOOLEAN_LENGTH = BYTE_LENGTH;
-	private static final int SHORT_LENGTH = Short.SIZE / Byte.SIZE;
-	private static final int INT_LENGTH = Integer.SIZE / Byte.SIZE;
-	private static final int LONG_LENGTH = Long.SIZE / Byte.SIZE;
-
-	private static final int BYTE_MASK = 0xFF;
-	private static final int SHORT_MASK = 0xFFFF;
-	private static final long INT_MASK = 0xFFFF_FFFFL;
-	private static final byte BOOLEAN_TRUE = 1;
-	private static final byte BOOLEAN_FALSE = 0;
-
-	/**
-	 * This boolean indicates whether or not data read with the Unsafe needs to
-	 * be reversed byte-wise, because the VM is not big endian.
-	 */
-	private static final boolean REVERSE = ByteOrder.nativeOrder() != ByteOrder.BIG_ENDIAN;
-	private static final long BYTE_ARRAY_OFFSET = Unsafe.ARRAY_BYTE_BASE_OFFSET;
-	//private static final long SHORT_ARRAY_OFFSET = Unsafe.ARRAY_SHORT_BASE_OFFSET;
-	//private static final long INT_ARRAY_OFFSET = Unsafe.ARRAY_INT_BASE_OFFSET;
-	private static final long LONG_ARRAY_OFFSET = Unsafe.ARRAY_LONG_BASE_OFFSET;
-	private static final long BB_ADDRESS_OFFSET = fieldOffsetOrError(UNSAFE, Buffer.class, "address");
-
-	private FastArrays() {
-		// no instantiation allowed
-		return;
 	}
 
 	/**
@@ -421,7 +422,7 @@ public final class FastArrays {
 				if ((dstPos + length) > dst.length) {
 					throw new ArrayIndexOutOfBoundsException(dstPos + length);
 				}
-				long address = UNSAFE.getLong(src, BB_ADDRESS_OFFSET);
+				final long address = UNSAFE.getLong(src, BB_ADDRESS_OFFSET);
 				UNSAFE.copyMemory(null, address + srcPos, dst, BYTE_ARRAY_OFFSET + dstPos, length);
 				src.position(srcPos + length);
 				return;
@@ -452,7 +453,7 @@ public final class FastArrays {
 				if ((dstPos + length) > dst.remaining()) {
 					throw new BufferOverflowException();
 				}
-				long address = UNSAFE.getLong(src, BB_ADDRESS_OFFSET);
+				final long address = UNSAFE.getLong(src, BB_ADDRESS_OFFSET);
 				UNSAFE.copyMemory(src, address + srcPos, dst, BYTE_ARRAY_OFFSET + dstPos, length);
 				dst.position(dstPos + length);
 				return;
@@ -606,7 +607,8 @@ public final class FastArrays {
 		}
 		final StringBuilder sb = new StringBuilder(length * 2);
 		try (final Formatter fmt = new Formatter(sb)) {
-			for (int i = offset, k = offset + length; i < k; i++) {
+			final int k = offset + length;
+			for (int i = offset; i < k; i++) {
 				fmt.format("%02X", Byte.valueOf(value[i]));
 			}
 		}
