@@ -186,6 +186,29 @@ public final class SettableCallbackFuture<V> implements CallbackFuture<V> {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public void onCompletion(final Runnable runnable) {
+		if (notified) {
+			runnable.run();
+			return;
+		}
+
+		synchronized (sync) {
+			// re-check for safety
+			if (notified) {
+				runnable.run();
+				return;
+			}
+			if (tasks == null) {
+				tasks = new ArrayDeque<>();
+			}
+			tasks.add(new Task(runnable));
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void onCompletion(final Runnable runnable, final Executor executor) {
 		if (notified) {
 			executor.execute(runnable);
@@ -212,13 +235,21 @@ public final class SettableCallbackFuture<V> implements CallbackFuture<V> {
 		private final Runnable runnable;
 		private final Executor executor;
 
+		Task(final Runnable runnable) {
+			this(runnable, null);
+		}
+
 		Task(final Runnable runnable, final Executor executor) {
 			this.runnable = runnable;
 			this.executor = executor;
 		}
 
 		void execute() {
-			executor.execute(runnable);
+			if (executor != null) {
+				executor.execute(runnable);
+				return;
+			}
+			runnable.run();
 		}
 	}
 }

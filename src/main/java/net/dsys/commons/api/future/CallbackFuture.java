@@ -26,6 +26,15 @@ import java.util.concurrent.Future;
  */
 public interface CallbackFuture<V> extends Future<V> {
 
+	/**
+	 * If this future is not done, the runnable will run in the same thread that
+	 * completes the future. Otherwise it will run in the caller's thread.
+	 */
+	void onCompletion(Runnable runnable);
+
+	/**
+	 * The runnable will be executed by the executor.
+	 */
 	void onCompletion(Runnable runnable, Executor executor);
 
 }

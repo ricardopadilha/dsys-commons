@@ -25,10 +25,7 @@ import java.util.Queue;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -47,8 +44,6 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 	private final Merger<V> merger;
 	private final List<CallbackFuture<V>> futures;
 	private final int size;
-
-	private final ExecutorService executor;
 	private final BitSet bitset;
 	private final List<V> values;
 
@@ -77,12 +72,7 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 		this.merger = merger;
 		this.futures = new ArrayList<>(futures);
 		this.size = futures.size();
-
-		final ExecutorService executor = Executors.newSingleThreadExecutor();
-		final BitSet bitset = new BitSet(size);
-
-		this.executor = executor;
-		this.bitset = bitset;
+		this.bitset = new BitSet(size);
 		this.values = new ArrayList<>(size);
 
 		for (int i = 0; i < size; i++) {
@@ -91,51 +81,42 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 			future.onCompletion(new Runnable() {
 				@Override
 				public void run() {
-					if (!future.isDone()) {
-						throw new AssertionError(future);
-					}
-					if (future.isCancelled()) {
-						return;
-					}
-					try {
-						success(index, future.get());
-					} catch (final Throwable t) {
-						fail(t);
-					}
+					done(index, future);
 				}
-				
-			}, executor);
+			});
 		}
 	}
 
-	void success(final int index, final V value) {
+	void done(final int index, final Future<V> future) {
+		if (!future.isDone()) {
+			throw new AssertionError(future);
+		}
+		if (future.isCancelled()) {
+			return;
+		}
 		synchronized (sync) {
 			if (done) {
 				return;
 			}
-			values.add(value);
-			bitset.set(index);
-			if (bitset.cardinality() == size) {
-				this.value = merger.merge(values);
+			try {
+				values.add(future.get());
+				bitset.set(index);
+				if (bitset.cardinality() == size) {
+					this.value = merger.merge(values);
+					this.done = true;
+					notifyCompletion();
+				}
+			} catch (final Throwable throwable) {
+				if (throwable instanceof ExecutionException) {
+					this.throwable = throwable.getCause();
+				} else {
+					this.throwable = throwable;
+				}
 				this.done = true;
 				notifyCompletion();
 			}
 		}
-	}
 
-	void fail(final Throwable throwable) {
-		synchronized (sync) {
-			if (done) {
-				return;
-			}
-			if (throwable instanceof ExecutionException) {
-				this.throwable = throwable.getCause();
-			} else {
-				this.throwable = throwable;
-			}
-			this.done = true;
-			notifyCompletion();
-		}
 	}
 
 	/**
@@ -172,7 +153,6 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 		}
 		notified = true;
 		sync.notifyAll();
-		executor.shutdownNow();
 	}
 
 	/**
@@ -256,6 +236,29 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public void onCompletion(final Runnable runnable) {
+		if (notified) {
+			runnable.run();
+			return;
+		}
+
+		synchronized (sync) {
+			// re-check for safety
+			if (notified) {
+				runnable.run();
+				return;
+			}
+			if (tasks == null) {
+				tasks = new ArrayDeque<>();
+			}
+			tasks.add(new Task(runnable));
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void onCompletion(final Runnable runnable, final Executor executor) {
 		if (notified) {
 			executor.execute(runnable);
@@ -290,18 +293,21 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 		private final Runnable runnable;
 		private final Executor executor;
 
+		Task(final Runnable runnable) {
+			this(runnable, null);
+		}
+
 		Task(final Runnable runnable, final Executor executor) {
 			this.runnable = runnable;
 			this.executor = executor;
 		}
 
 		void execute() {
-			try {
+			if (executor != null) {
 				executor.execute(runnable);
-			} catch (final RejectedExecutionException e) {
-				// ignore it, since cancelled futures will cause this exception
 				return;
 			}
+			runnable.run();
 		}
 	}
 
