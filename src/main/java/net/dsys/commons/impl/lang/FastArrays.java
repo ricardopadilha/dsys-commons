@@ -29,6 +29,8 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Formatter;
 
+import net.dsys.commons.api.exception.Bug;
+
 import sun.misc.Unsafe;
 
 /**
@@ -98,7 +100,7 @@ public final class FastArrays {
 		try {
 			return fieldOffset(unsafe, cl, field);
 		} catch (final NoSuchFieldException | SecurityException e) {
-			throw new AssertionError(e.getLocalizedMessage());
+			throw new Bug(e);
 		}
 	}
 

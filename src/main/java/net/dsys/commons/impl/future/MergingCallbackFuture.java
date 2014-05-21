@@ -29,6 +29,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import net.dsys.commons.api.exception.Bug;
 import net.dsys.commons.api.future.CallbackFuture;
 import net.dsys.commons.api.lang.Merger;
 import net.dsys.commons.impl.builder.Mandatory;
@@ -89,7 +90,7 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 
 	void done(final int index, final Future<V> future) {
 		if (!future.isDone()) {
-			throw new AssertionError(future);
+			throw new Bug("!future.isDone()");
 		}
 		if (future.isCancelled()) {
 			return;
