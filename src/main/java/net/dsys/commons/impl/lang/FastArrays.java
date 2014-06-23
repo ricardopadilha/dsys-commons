@@ -546,12 +546,12 @@ public final class FastArrays {
 	/**
 	 * Lexicographical (unsigned) comparison.
 	 */
-	public static int compareArrayBuffers(final byte[] left, final int leftOffset, final int leftLength,
-			final ByteBuffer right) {
-		if (right.isDirect()) {
-			throw new IllegalArgumentException("right is direct");
+	public static int compareBuffers(final ByteBuffer left, final ByteBuffer right) {
+		if (right.isDirect() || left.isDirect()) {
+			throw new IllegalArgumentException("buffer is direct");
 		}
-		return compareArrays(left, leftOffset, leftLength, right.array(), right.position(), right.remaining());
+		return compareArrays(left.array(), left.arrayOffset() + left.position(), left.remaining(),
+				right.array(), right.arrayOffset() + right.position(), right.remaining());
 	}
 
 	/**
