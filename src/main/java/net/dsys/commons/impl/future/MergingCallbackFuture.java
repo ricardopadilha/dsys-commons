@@ -29,6 +29,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 import net.dsys.commons.api.exception.Bug;
 import net.dsys.commons.api.future.CallbackFuture;
 import net.dsys.commons.api.lang.Merger;
@@ -56,7 +59,8 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 	private Queue<Task> tasks;
 	private boolean notified;
 
-	public MergingCallbackFuture(final Merger<V> merger, final Collection<CallbackFuture<V>> futures) {
+	public MergingCallbackFuture(@Nonnull final Merger<V> merger,
+			@Nonnull final Collection<CallbackFuture<V>> futures) {
 		if (merger == null) {
 			throw new NullPointerException("merger == null");
 		}
@@ -88,7 +92,7 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 		}
 	}
 
-	void done(final int index, final Future<V> future) {
+	void done(@Nonnegative final int index, @Nonnull final Future<V> future) {
 		if (!future.isDone()) {
 			throw new Bug("!future.isDone()");
 		}
@@ -208,8 +212,8 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public V get(final long timeout, final TimeUnit unit) throws ExecutionException, TimeoutException,
-			InterruptedException {
+	public V get(final long timeout, final TimeUnit unit)
+			throws ExecutionException, TimeoutException, InterruptedException {
 		synchronized (sync) {
 			if (done) {
 				if (cancelled) {
@@ -238,6 +242,10 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 	 */
 	@Override
 	public void onCompletion(final Runnable runnable) {
+		if (runnable == null) {
+			throw new NullPointerException("runnable == null");
+		}
+
 		if (notified) {
 			runnable.run();
 			return;
@@ -261,6 +269,13 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 	 */
 	@Override
 	public void onCompletion(final Runnable runnable, final Executor executor) {
+		if (runnable == null) {
+			throw new NullPointerException("runnable == null");
+		}
+		if (executor == null) {
+			throw new NullPointerException("executor == null");
+		}
+
 		if (notified) {
 			executor.execute(runnable);
 			return;
@@ -283,6 +298,7 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 	 * @return a {@link Builder} for {@link MergingCallbackFuture}, which uses a
 	 *         {@link Merger} created using {@link #createNullMerger()}
 	 */
+	@Nonnull
 	public static <E> Builder<E> builder() {
 		return new Builder<>();
 	}
@@ -291,14 +307,16 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 	 * @author Ricardo Padilha
 	 */
 	private static final class Task {
+
 		private final Runnable runnable;
 		private final Executor executor;
 
-		Task(final Runnable runnable) {
-			this(runnable, null);
+		Task(@Nonnull final Runnable runnable) {
+			this.runnable = runnable;
+			this.executor = null;
 		}
 
-		Task(final Runnable runnable, final Executor executor) {
+		Task(@Nonnull final Runnable runnable, @Nonnull final Executor executor) {
 			this.runnable = runnable;
 			this.executor = executor;
 		}
@@ -333,7 +351,7 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 		 * The default merger always returns <code>null</code>.
 		 */
 		@Mandatory(restrictions = "merger != null")
-		public Builder<E> mergeWith(final Merger<E> merger) {
+		public Builder<E> mergeWith(@Nonnull final Merger<E> merger) {
 			if (merger == null) {
 				throw new NullPointerException("merger == null");
 			}
@@ -342,7 +360,7 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 		}
 
 		@Optional(defaultValue = "empty", restrictions = "future != null")
-		public Builder<E> add(final CallbackFuture<E> future) {
+		public Builder<E> add(@Nonnull final CallbackFuture<E> future) {
 			if (future == null) {
 				throw new NullPointerException("future == null");
 			}
@@ -350,6 +368,7 @@ public final class MergingCallbackFuture<V> implements CallbackFuture<V> {
 			return this;
 		}
 
+		@Nonnull
 		public MergingCallbackFuture<E> build() {
 			return new MergingCallbackFuture<>(merger, list);
 		}

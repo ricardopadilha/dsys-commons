@@ -22,6 +22,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.annotation.Nonnull;
+import javax.annotation.meta.When;
+
 /**
  * @author Ricardo Padilha
  */
@@ -31,7 +34,7 @@ public final class CountDownFuture<V> implements Future<V> {
 	private final V value;
 	private volatile Throwable exception;
 
-	public CountDownFuture(final CountDownLatch latch, final V value) {
+	public CountDownFuture(@Nonnull final CountDownLatch latch, @Nonnull(when = When.MAYBE) final V value) {
 		if (latch == null) {
 			throw new NullPointerException("latch == null");
 		}
@@ -39,7 +42,7 @@ public final class CountDownFuture<V> implements Future<V> {
 		this.value = value;
 	}
 
-	public void fail(final Throwable exception) {
+	public void fail(@Nonnull final Throwable exception) {
 		assert latch.getCount() > 0;
 		this.exception = exception;
 		while (latch.getCount() > 0) {
@@ -75,6 +78,7 @@ public final class CountDownFuture<V> implements Future<V> {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Nonnull(when = When.MAYBE)
 	public V get() throws InterruptedException, ExecutionException {
 		latch.await();
 		final Throwable t = exception;
@@ -88,8 +92,9 @@ public final class CountDownFuture<V> implements Future<V> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException,
-			TimeoutException {
+	@Nonnull(when = When.MAYBE)
+	public V get(final long timeout, final TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
 		if (!latch.await(timeout, unit)) {
 			throw new TimeoutException();
 		}
@@ -99,5 +104,4 @@ public final class CountDownFuture<V> implements Future<V> {
 		}
 		return value;
 	}
-
 }

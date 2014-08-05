@@ -18,6 +18,9 @@ package net.dsys.commons.impl.lang;
 
 import java.util.Collection;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 import net.dsys.commons.api.lang.ConditionalMerger;
 import net.dsys.commons.api.vote.Election;
 import net.dsys.commons.api.vote.Voter;
@@ -43,7 +46,7 @@ public final class ThresholdMerger<T> implements ConditionalMerger<T> {
 	 * @param threshold
 	 *            threshold for valid merge
 	 */
-	public ThresholdMerger(final int threshold) {
+	public ThresholdMerger(@Nonnegative final int threshold) {
 		this(threshold, new HashcodeVoter<T>());
 	}
 
@@ -53,7 +56,7 @@ public final class ThresholdMerger<T> implements ConditionalMerger<T> {
 	 * @param voter
 	 *            voting function
 	 */
-	public ThresholdMerger(final int threshold, final Voter<T> voter) {
+	public ThresholdMerger(@Nonnegative final int threshold, @Nonnull final Voter<T> voter) {
 		if (threshold < 1) {
 			throw new IllegalArgumentException("threshold < 1");
 		}

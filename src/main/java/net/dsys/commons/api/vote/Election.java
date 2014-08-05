@@ -15,6 +15,10 @@
  */
 package net.dsys.commons.api.vote;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+import javax.annotation.meta.When;
+
 /**
  * An Election implements a voting algorithm to select the majority element
  * in a given collection of votes.
@@ -35,7 +39,8 @@ public interface Election {
 	 * @throws IllegalArgumentException
 	 *             if there are more different candidates than the threshold
 	 */
-	<V> V elect(int threshold, Voter<V> converter, Iterable<V> votes);
+	@Nonnull(when = When.MAYBE)
+	<V> V elect(@Nonnegative int threshold, @Nonnull Voter<V> converter, @Nonnull Iterable<V> votes);
 
 	/**
 	 * Select the majority out of an array, based on value.
@@ -50,7 +55,8 @@ public interface Election {
 	 * @throws IllegalArgumentException
 	 *             if there are more different candidates than the threshold
 	 */
-	int elect(int threshold, int nullValue, int... votes);
+	@Nonnegative(when = When.MAYBE)
+	int elect(@Nonnegative int threshold, int nullValue, @Nonnull int... votes);
 
 	/**
 	 * Select the majority out of an array, based on value.
@@ -65,6 +71,7 @@ public interface Election {
 	 * @throws IllegalArgumentException
 	 *             if there are more different candidates than the threshold
 	 */
-	int elect(int threshold, long nullValue, long... votes);
+	@Nonnegative(when = When.MAYBE)
+	int elect(@Nonnegative int threshold, long nullValue, @Nonnull long... votes);
 
 }

@@ -18,6 +18,8 @@ package net.dsys.commons.impl.lang;
 
 import java.nio.ByteBuffer;
 
+import javax.annotation.Nonnegative;
+
 import net.dsys.commons.api.lang.Factory;
 
 /**
@@ -27,7 +29,7 @@ public final class ByteBufferFactory implements Factory<ByteBuffer> {
 
 	private final int length;
 
-	public ByteBufferFactory(final int length) {
+	public ByteBufferFactory(@Nonnegative final int length) {
 		if (length < 1) {
 			throw new IllegalArgumentException("length < 1");
 		}

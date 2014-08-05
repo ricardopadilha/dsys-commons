@@ -24,6 +24,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.annotation.Nonnull;
+
 import net.dsys.commons.api.lang.Merger;
 import net.dsys.commons.impl.builder.Mandatory;
 import net.dsys.commons.impl.builder.Optional;
@@ -37,7 +39,7 @@ public final class MergingFuture<V> implements Future<V> {
 	private final Merger<V> merger;
 	private final Collection<Future<V>> futures;
 
-	public MergingFuture(final Merger<V> merger, final Collection<Future<V>> futures) {
+	public MergingFuture(@Nonnull final Merger<V> merger, @Nonnull final Collection<Future<V>> futures) {
 		if (merger == null) {
 			throw new NullPointerException("merger == null");
 		}
@@ -105,8 +107,8 @@ public final class MergingFuture<V> implements Future<V> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException,
-			TimeoutException {
+	public V get(final long timeout, final TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
 		final List<V> list = new ArrayList<>(futures.size());
 		for (final Future<V> future : futures) {
 			list.add(future.get(timeout, unit));
@@ -118,6 +120,7 @@ public final class MergingFuture<V> implements Future<V> {
 	 * @return a {@link Builder} for {@link MergingFuture}, which uses a
 	 *         {@link Merger} created using {@link #createNullMerger()}
 	 */
+	@Nonnull
 	public static <E> Builder<E> builder() {
 		return new Builder<>();
 	}
@@ -143,7 +146,7 @@ public final class MergingFuture<V> implements Future<V> {
 		 * The default merger always returns <code>null</code>.
 		 */
 		@Mandatory(restrictions = "merger != null")
-		public Builder<E> mergeWith(final Merger<E> merger) {
+		public Builder<E> mergeWith(@Nonnull final Merger<E> merger) {
 			if (merger == null) {
 				throw new NullPointerException("merger == null");
 			}
@@ -152,7 +155,7 @@ public final class MergingFuture<V> implements Future<V> {
 		}
 
 		@Optional(defaultValue = "empty", restrictions = "future != null")
-		public Builder<E> add(final Future<E> future) {
+		public Builder<E> add(@Nonnull final Future<E> future) {
 			if (future == null) {
 				throw new NullPointerException("future == null");
 			}
@@ -160,6 +163,7 @@ public final class MergingFuture<V> implements Future<V> {
 			return this;
 		}
 
+		@Nonnull
 		public MergingFuture<E> build() {
 			return new MergingFuture<>(merger, list);
 		}

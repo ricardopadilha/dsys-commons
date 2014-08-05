@@ -19,6 +19,8 @@ package net.dsys.commons.impl.lang;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Ricardo Padilha
  */
@@ -28,7 +30,7 @@ public final class DaemonThreadFactory implements ThreadFactory {
 	private final ThreadGroup group;
 	private final AtomicInteger counter;
 
-	public DaemonThreadFactory(final String name) {
+	public DaemonThreadFactory(@Nonnull final String name) {
 		if (name == null) {
 			throw new NullPointerException("name == null");
 		}
@@ -46,7 +48,7 @@ public final class DaemonThreadFactory implements ThreadFactory {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Thread newThread(final Runnable runnable) {
+	public Thread newThread(@Nonnull final Runnable runnable) {
 		final String threadName = name + "-" + counter.getAndIncrement();
 		final Thread thread = new Thread(group, runnable, threadName);
 		thread.setDaemon(true);

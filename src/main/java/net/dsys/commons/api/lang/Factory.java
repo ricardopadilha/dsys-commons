@@ -16,6 +16,8 @@
 
 package net.dsys.commons.api.lang;
 
+import javax.annotation.Nonnull;
+
 /**
  * Common interface for generic object factories.
  * 
@@ -26,6 +28,7 @@ public interface Factory<T> {
 	/**
 	 * @return a new instance
 	 */
+	@Nonnull
 	T newInstance();
 
 }

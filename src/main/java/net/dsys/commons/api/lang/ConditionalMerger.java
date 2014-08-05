@@ -18,6 +18,9 @@ package net.dsys.commons.api.lang;
 
 import java.util.Collection;
 
+import javax.annotation.Nonnull;
+import javax.annotation.meta.When;
+
 /**
  * A conditional merger will only merge if enough values are given. Callers can
  * check if there are enough values using {@link #canMerge(Collection)}.
@@ -31,7 +34,7 @@ public interface ConditionalMerger<T> extends Merger<T> {
 	 *            the values to be merged
 	 * @return <code>true</code> if there are enough values to be merged
 	 */
-	boolean canMerge(Collection<T> values);
+	boolean canMerge(@Nonnull Collection<T> values);
 
 	/**
 	 * @param values
@@ -41,6 +44,7 @@ public interface ConditionalMerger<T> extends Merger<T> {
 	 *             if there are not enough values to merge
 	 */
 	@Override
-	T merge(Collection<T> values);
+	@Nonnull(when = When.MAYBE)
+	T merge(@Nonnull Collection<T> values);
 
 }

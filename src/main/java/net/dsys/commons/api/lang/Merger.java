@@ -18,6 +18,9 @@ package net.dsys.commons.api.lang;
 
 import java.util.Collection;
 
+import javax.annotation.Nonnull;
+import javax.annotation.meta.When;
+
 /**
  * Generic interface for merging data.
  * 
@@ -30,6 +33,7 @@ public interface Merger<T> {
 	 *            the values to be merged
 	 * @return the merged result
 	 */
-	T merge(Collection<T> values);
+	@Nonnull(when = When.MAYBE)
+	T merge(@Nonnull Collection<T> values);
 
 }

@@ -22,6 +22,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.annotation.Nonnull;
+
 /**
  * @author Ricardo Padilha
  */
@@ -56,7 +58,7 @@ public final class SettableFuture<V> implements Future<V> {
 	 * Define the outcome of this future, notify threads waiting on
 	 * {@link #get()}.
 	 */
-	public void fail(final Throwable exception) {
+	public void fail(@Nonnull final Throwable exception) {
 		synchronized (sync) {
 			if (done) {
 				return;
@@ -135,8 +137,8 @@ public final class SettableFuture<V> implements Future<V> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException,
-			TimeoutException {
+	public V get(final long timeout, final TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
 		synchronized (sync) {
 			if (done) {
 				if (cancelled) {
@@ -159,5 +161,4 @@ public final class SettableFuture<V> implements Future<V> {
 			return value;
 		}
 	}
-
 }

@@ -24,6 +24,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.annotation.Nonnull;
+
 import net.dsys.commons.api.future.CallbackFuture;
 
 /**
@@ -62,7 +64,7 @@ public final class SettableCallbackFuture<V> implements CallbackFuture<V> {
 	 * Define the outcome of this future, notify threads waiting on
 	 * {@link #get()}.
 	 */
-	public void fail(final Throwable throwable) {
+	public void fail(@Nonnull final Throwable throwable) {
 		synchronized (sync) {
 			if (done) {
 				return;
@@ -157,8 +159,8 @@ public final class SettableCallbackFuture<V> implements CallbackFuture<V> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException,
-			TimeoutException {
+	public V get(final long timeout, final TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
 		synchronized (sync) {
 			if (done) {
 				if (cancelled) {
@@ -187,6 +189,10 @@ public final class SettableCallbackFuture<V> implements CallbackFuture<V> {
 	 */
 	@Override
 	public void onCompletion(final Runnable runnable) {
+		if (runnable == null) {
+			throw new NullPointerException("runnable == null");
+		}
+
 		if (notified) {
 			runnable.run();
 			return;
@@ -210,6 +216,13 @@ public final class SettableCallbackFuture<V> implements CallbackFuture<V> {
 	 */
 	@Override
 	public void onCompletion(final Runnable runnable, final Executor executor) {
+		if (runnable == null) {
+			throw new NullPointerException("runnable == null");
+		}
+		if (executor == null) {
+			throw new NullPointerException("executor == null");
+		}
+
 		if (notified) {
 			executor.execute(runnable);
 			return;
@@ -232,14 +245,16 @@ public final class SettableCallbackFuture<V> implements CallbackFuture<V> {
 	 * @author Ricardo Padilha
 	 */
 	private static final class Task {
+
 		private final Runnable runnable;
 		private final Executor executor;
 
-		Task(final Runnable runnable) {
-			this(runnable, null);
+		Task(@Nonnull final Runnable runnable) {
+			this.runnable = runnable;
+			this.executor = null;
 		}
 
-		Task(final Runnable runnable, final Executor executor) {
+		Task(@Nonnull final Runnable runnable, @Nonnull final Executor executor) {
 			this.runnable = runnable;
 			this.executor = executor;
 		}

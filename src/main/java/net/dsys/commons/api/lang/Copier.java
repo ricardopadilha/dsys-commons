@@ -16,6 +16,8 @@
 
 package net.dsys.commons.api.lang;
 
+import javax.annotation.Nonnull;
+
 /**
  * Interface used to provide generic copiers, i.e., implementations that copy
  * the content of one object into another.
@@ -28,6 +30,6 @@ public interface Copier<T> {
 	 * Copy the content of the input into the output, clearing the output if
 	 * needed. The state of the input must remain unchanged.
 	 */
-	void copy(T in, T out);
+	void copy(@Nonnull T in, @Nonnull T out);
 
 }

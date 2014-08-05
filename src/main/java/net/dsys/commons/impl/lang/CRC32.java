@@ -19,6 +19,9 @@ package net.dsys.commons.impl.lang;
 import java.nio.ByteBuffer;
 import java.util.zip.Checksum;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 /**
  * Calculation of CRC32 based on a cached table. This implementation outperforms
  * the CRC32 implementation that is in the java.util.zip package by a factor of
@@ -96,7 +99,7 @@ public final class CRC32 implements Checksum {
 		reset();
 	}
 
-	public static int digest(final byte... values) {
+	public static int digest(@Nonnull final byte... values) {
 		final int k = values.length;
 		int crc = INT_MASK;
 		for (int j = 0; j < k; j++) {
@@ -122,7 +125,7 @@ public final class CRC32 implements Checksum {
 	/**
 	 * Calculates the CRC32 of integers as if they were 4-byte arrays (big-endian).
 	 */
-	public static int digest(final int... values) {
+	public static int digest(@Nonnull final int... values) {
 		final int k = values.length;
 		int crc = INT_MASK;
 		for (int j = 0; j < k; j++) {
@@ -152,7 +155,7 @@ public final class CRC32 implements Checksum {
 	/**
 	 * Calculates the CRC32 of longs as if they were 8-byte arrays (big-endian).
 	 */
-	public static int digest(final long... values) {
+	public static int digest(@Nonnull final long... values) {
 		final int k = values.length;
 		int crc = INT_MASK;
 		for (int j = 0; j < k; j++) {
@@ -169,7 +172,8 @@ public final class CRC32 implements Checksum {
 	/**
 	 * Calculates the CRC32 of a byte array.
 	 */
-	public static int digest(final byte[] array, final int offset, final int length) {
+	public static int digest(@Nonnull final byte[] array, @Nonnegative final int offset,
+			@Nonnegative final int length) {
 		final int k = offset + length;
 		int crc = INT_MASK;
 		for (int i = offset; i < k; i++) {
@@ -185,7 +189,7 @@ public final class CRC32 implements Checksum {
 	 * buffer.position() Upon return, the buffer's position will be updated to
 	 * its limit; its limit will not have been changed.
 	 */
-	public static int digest(final ByteBuffer value) {
+	public static int digest(@Nonnull final ByteBuffer value) {
 		final int k = value.limit();
 		int crc = INT_MASK;
 		for (int i = value.position(); i < k; i++) {
@@ -201,7 +205,8 @@ public final class CRC32 implements Checksum {
 	 * checksum is updated byte retrieving bytes directly from the buffer.
 	 * The buffer's position and limit are not affected.
 	 */
-	public static int digest(final ByteBuffer value, final int position, final int limit) {
+	public static int digest(@Nonnull final ByteBuffer value, @Nonnegative final int position,
+			@Nonnegative final int limit) {
 		int crc = INT_MASK;
 		for (int i = position; i < limit; i++) {
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ value.get(i)) & BYTE_MASK];
@@ -230,7 +235,7 @@ public final class CRC32 implements Checksum {
 	 * Updates the CRC-32 checksum with the specified array of bytes.
 	 * @param array the array of bytes to update the checksum with
 	 */
-	public void update(final byte[] array) {
+	public void update(@Nonnull final byte[] array) {
 		update(array, 0, array.length);
 	}
 
@@ -240,7 +245,8 @@ public final class CRC32 implements Checksum {
 	 * @param length
 	 */
 	@Override
-	public void update(final byte[] array, final int offset, final int length) {
+	public void update(@Nonnull final byte[] array, @Nonnegative final int offset,
+			@Nonnegative final int length) {
 		final int k = offset + length;
 		for (int i = offset; i < k; i++) {
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ array[i]) & BYTE_MASK];
@@ -255,7 +261,7 @@ public final class CRC32 implements Checksum {
 	 * 
 	 * @param buffer the ByteBuffer to update the checksum with
 	 */
-	public void update(final ByteBuffer buffer) {
+	public void update(@Nonnull final ByteBuffer buffer) {
 		final int k = buffer.limit();
 		for (int i = buffer.position(); i < k; i++) {
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ buffer.get(i)) & BYTE_MASK];
@@ -270,7 +276,8 @@ public final class CRC32 implements Checksum {
 	 * 
 	 * @param buffer the ByteBuffer to update the checksum with
 	 */
-	public void update(final ByteBuffer value, final int position, final int limit) {
+	public void update(@Nonnull final ByteBuffer value, @Nonnegative final int position,
+			@Nonnegative final int limit) {
 		for (int i = position; i < limit; i++) {
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ value.get(i)) & BYTE_MASK];
 		}

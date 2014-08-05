@@ -16,6 +16,8 @@
 
 package net.dsys.commons.api.exception;
 
+import javax.annotation.Nonnull;
+
 /**
  * This class is thrown when there is a condition in the code that can only be
  * the result of a coding bug.
@@ -29,29 +31,29 @@ public class Bug extends Error {
 	/**
 	 * @see Error#Error(String)
 	 */
-	public Bug(final String message) {
+	public Bug(@Nonnull final String message) {
 		super(message);
 	}
 
 	/**
 	 * @see Error#Error(Throwable)
 	 */
-	public Bug(final Throwable cause) {
+	public Bug(@Nonnull final Throwable cause) {
 		super(cause);
 	}
 
 	/**
 	 * @see Error#Error(String, Throwable)
 	 */
-	public Bug(final String message, final Throwable cause) {
+	public Bug(@Nonnull final String message, @Nonnull final Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
 	 * @see Error#Error(String, Throwable, boolean, boolean)
 	 */
-	protected Bug(final String message, final Throwable cause, final boolean enableSuppression,
-			final boolean writableStackTrace) {
+	protected Bug(@Nonnull final String message, @Nonnull final Throwable cause,
+			final boolean enableSuppression, final boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 }

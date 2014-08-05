@@ -16,6 +16,9 @@
 
 package net.dsys.commons.api.vote;
 
+import javax.annotation.Nonnull;
+import javax.annotation.meta.When;
+
 /**
  * This is an helper interface to {@link Election}. Implementors have to provide an
  * integer that represents the vote of the given object.
@@ -27,6 +30,6 @@ public interface Voter<V> {
 	/**
 	 * @return an integer that represents the vote of a given object
 	 */
-	int getVote(V value);
+	int getVote(@Nonnull(when = When.MAYBE) V value);
 
 }

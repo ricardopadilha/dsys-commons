@@ -16,6 +16,8 @@
 
 package net.dsys.commons.api.lang;
 
+import javax.annotation.Nonnull;
+
 /**
  * Interface used to provide generic cleaners, i.e., implementations that clear
  * the content of one object.
@@ -27,6 +29,6 @@ public interface Cleaner<T> {
 	/**
 	 * Clear the content of the given element.
 	 */
-	void clear(T element);
+	void clear(@Nonnull T element);
 
 }

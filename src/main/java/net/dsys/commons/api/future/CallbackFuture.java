@@ -16,8 +16,13 @@
 
 package net.dsys.commons.api.future;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import javax.annotation.Nonnull;
 
 /**
  * Based on Guava's ListenableFuture.
@@ -26,15 +31,28 @@ import java.util.concurrent.Future;
  */
 public interface CallbackFuture<V> extends Future<V> {
 
+    /**
+     * Overridden to include annotations.
+     * 
+     * {@inheritDoc}
+     */
+    @Override
+    
+	V get() throws InterruptedException, ExecutionException;
+
+    @Override
+	V get(long timeout, TimeUnit unit)
+            throws InterruptedException, ExecutionException, TimeoutException;
+
 	/**
 	 * If this future is not done, the runnable will run in the same thread that
 	 * completes the future. Otherwise it will run in the caller's thread.
 	 */
-	void onCompletion(Runnable runnable);
+	void onCompletion(@Nonnull Runnable runnable);
 
 	/**
 	 * The runnable will be executed by the executor.
 	 */
-	void onCompletion(Runnable runnable, Executor executor);
+	void onCompletion(@Nonnull Runnable runnable, @Nonnull Executor executor);
 
 }

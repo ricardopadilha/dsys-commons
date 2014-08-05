@@ -16,6 +16,9 @@
 
 package net.dsys.commons.api.lang;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
+
 /**
  * Similar to TimeUnit, to convert between binary units. Follows IEEE 1541-2002.
  * Zetta/zebi and yotta/yebi prefixes were removed because they cannot be
@@ -334,39 +337,39 @@ public enum BinaryUnit {
 	private static final long C5 = C4 * 1000L;
 	private static final long C6 = C5 * 1000L;
 
-	public abstract long convert(long value, BinaryUnit sourceUnit);
+	public abstract long convert(@Nonnegative long value, @Nonnull BinaryUnit sourceUnit);
 
-	public abstract long toBits(long value);
+	public abstract long toBits(@Nonnegative long value);
 
-	public abstract long toKilobits(long value);
+	public abstract long toKilobits(@Nonnegative long value);
 
-	public abstract long toMegabits(long value);
+	public abstract long toMegabits(@Nonnegative long value);
 
-	public abstract long toGigabits(long value);
+	public abstract long toGigabits(@Nonnegative long value);
 
-	public abstract long toTerabits(long value);
+	public abstract long toTerabits(@Nonnegative long value);
 
-	public abstract long toPetabits(long value);
+	public abstract long toPetabits(@Nonnegative long value);
 
-	public abstract long toExabits(long value);
+	public abstract long toExabits(@Nonnegative long value);
 
-	public abstract long toKibibits(long value);
+	public abstract long toKibibits(@Nonnegative long value);
 
-	public abstract long toMebibits(long value);
+	public abstract long toMebibits(@Nonnegative long value);
 
-	public abstract long toGibibits(long value);
+	public abstract long toGibibits(@Nonnegative long value);
 
-	public abstract long toTebibits(long value);
+	public abstract long toTebibits(@Nonnegative long value);
 
-	public abstract long toPebibits(long value);
+	public abstract long toPebibits(@Nonnegative long value);
 
-	public abstract long toExbibits(long value);
+	public abstract long toExbibits(@Nonnegative long value);
 
-	public static long bytesToBits(final long value) {
+	public static long bytesToBits(@Nonnegative final long value) {
 		return value * A0;
 	}
 
-	public static long bitsToBytes(final long value) {
+	public static long bitsToBytes(@Nonnegative final long value) {
 		return value / A0;
 	}
 }
