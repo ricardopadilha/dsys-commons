@@ -16,11 +16,8 @@
 
 package net.dsys.commons.api.future;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nonnull;
 
@@ -30,19 +27,6 @@ import javax.annotation.Nonnull;
  * @author Ricardo Padilha
  */
 public interface CallbackFuture<V> extends Future<V> {
-
-    /**
-     * Overridden to include annotations.
-     * 
-     * {@inheritDoc}
-     */
-    @Override
-    
-	V get() throws InterruptedException, ExecutionException;
-
-    @Override
-	V get(long timeout, TimeUnit unit)
-            throws InterruptedException, ExecutionException, TimeoutException;
 
 	/**
 	 * If this future is not done, the runnable will run in the same thread that
