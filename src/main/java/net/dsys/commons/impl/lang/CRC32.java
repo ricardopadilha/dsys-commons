@@ -115,7 +115,7 @@ public final class CRC32 implements Checksum {
 	public static int digest(final int value) {
 		int crc = INT_MASK;
 		for (int i = INT_COUNT; i >= 0; i--) {
-			final byte b = (byte) (value >>> (i * BYTE_SIZE));
+			final byte b = (byte) ((value >>> (i * BYTE_SIZE)) & BYTE_MASK);
 			crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ b) & BYTE_MASK];
 		}
 		crc = crc ^ INT_MASK;
@@ -131,7 +131,7 @@ public final class CRC32 implements Checksum {
 		for (int j = 0; j < k; j++) {
 			final int value = values[j];
 			for (int i = INT_COUNT; i >= 0; i--) {
-				final byte b = (byte) (value >>> (i * BYTE_SIZE));
+				final byte b = (byte) ((value >>> (i * BYTE_SIZE)) & BYTE_MASK);
 				crc = (crc >>> BYTE_SIZE) ^ TABLE[(crc ^ b) & BYTE_MASK];
 			}
 		}

@@ -398,7 +398,8 @@ public final class FastArrays {
 			if ((srcPos + length) > src.length || (dstPos + length * LONG_LENGTH) > dst.length) {
 				throw new ArrayIndexOutOfBoundsException();
 			}
-			UNSAFE.copyMemory(src, LONG_ARRAY_OFFSET + srcPos, dst, BYTE_ARRAY_OFFSET + dstPos, length * LONG_LENGTH);
+			final long len = ((long) length) * LONG_LENGTH;
+			UNSAFE.copyMemory(src, LONG_ARRAY_OFFSET + srcPos, dst, BYTE_ARRAY_OFFSET + dstPos, len);
 			return;
 		}
 		// fall-back to plain Java

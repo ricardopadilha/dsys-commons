@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.LockSupport;
 
 import javax.annotation.Nonnull;
 
@@ -149,9 +150,7 @@ public final class SettableFuture<V> implements Future<V> {
 				}
 				return value;
 			}
-			final long millis = unit.toMillis(timeout);
-			final int nanos = (int) (unit.toNanos(timeout) - TimeUnit.MILLISECONDS.toNanos(millis));
-			sync.wait(millis, nanos);
+			LockSupport.parkNanos(sync, unit.toNanos(timeout));
 			if (!done) {
 				throw new TimeoutException();
 			}
